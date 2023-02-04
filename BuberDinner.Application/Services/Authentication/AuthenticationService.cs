@@ -37,17 +37,17 @@ namespace BuberDinner.Application.Services.Authentication
             return new AuthenticationResult(user, token);
         }
 
-        public AuthenticationResult Login(string email, string password)
+        public ErrorOr<AuthenticationResult> Login(string email, string password)
         {
             //Validation the user
             if (userRepository.GetUserByEmail(email) is not User user)
             {
-                throw new Exception("User with given email does not exist.");
+                return Errors.Authentication.InvalidCredentials;  
             }
             //Validating the password
             if (user.Password!=password)
             {
-                throw new Exception("Invalid password");
+                return new[] { Errors.Authentication.InvalidCredentials };
             }
             //Creating token
             var token = jwtTokenGenerator.GenerateToken(user);
