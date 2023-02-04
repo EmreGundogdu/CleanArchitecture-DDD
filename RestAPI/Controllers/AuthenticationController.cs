@@ -4,6 +4,7 @@ using BuberDinner.Application.Services.Authentication.Queries;
 using BuberDinner.Contracts.Authentication;
 using BuberDinner.Domain.Common.Errors;
 using ErrorOr;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BuberDinner.RestAPI.Controllers
@@ -11,19 +12,18 @@ namespace BuberDinner.RestAPI.Controllers
     [Route("[controller]")]
     public class AuthenticationController : ApiController
     {
-        private readonly IAuthenticationCommandService authenticationCommandService;
-        private readonly IAuthenticationQueryService authenticationQueryService;
+        private readonly IMediator mediator;
 
-        public AuthenticationController(IAuthenticationCommandService authenticationCommandService, IAuthenticationQueryService authenticationQueryService)
+        public AuthenticationController(IMediator mediator)
         {
-            this.authenticationCommandService = authenticationCommandService;
-            this.authenticationQueryService = authenticationQueryService;
+            this.mediator = mediator;
         }
 
         [HttpPost("register")]
         public IActionResult Register(RegisterRequest registerRequest)
         {
-            ErrorOr<AuthenticationResult> registerResult = authenticationCommandService.Register(registerRequest.FirstName, registerRequest.LastName, registerRequest.Email, registerRequest.Password);
+            var command= new RegisterCommand(registerRequest.FirstName,registerRequest.LastName,registerRequest.Email,registerRequest.Password);
+            ErrorOr<AuthenticationResult> registerResult = mediator.Send(command);
             return registerResult.Match(registerResult => Ok(MapAuthResult(registerResult)),
                 errors => Problem(errors));
         }
