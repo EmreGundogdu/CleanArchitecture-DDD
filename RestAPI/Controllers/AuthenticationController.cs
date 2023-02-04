@@ -1,10 +1,9 @@
-﻿using BuberDinner.Application.Common.Errors;
-using BuberDinner.Application.Services.Authentication;
+﻿using BuberDinner.Application.Services.Authentication.Commands;
+using BuberDinner.Application.Services.Authentication.Common;
+using BuberDinner.Application.Services.Authentication.Queries;
 using BuberDinner.Contracts.Authentication;
 using BuberDinner.Domain.Common.Errors;
 using ErrorOr;
-using FluentResults;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BuberDinner.RestAPI.Controllers
@@ -12,17 +11,19 @@ namespace BuberDinner.RestAPI.Controllers
     [Route("[controller]")]
     public class AuthenticationController : ApiController
     {
-        private readonly IAuthenticationCommandService authenticationService;
+        private readonly IAuthenticationCommandService authenticationCommandService;
+        private readonly IAuthenticationQueryService authenticationQueryService;
 
-        public AuthenticationController(IAuthenticationCommandService authenticationService)
+        public AuthenticationController(IAuthenticationCommandService authenticationCommandService, IAuthenticationQueryService authenticationQueryService)
         {
-            this.authenticationService = authenticationService;
+            this.authenticationCommandService = authenticationCommandService;
+            this.authenticationQueryService = authenticationQueryService;
         }
 
         [HttpPost("register")]
         public IActionResult Register(RegisterRequest registerRequest)
         {
-            ErrorOr<AuthenticationResult> registerResult = authenticationService.Register(registerRequest.FirstName, registerRequest.LastName, registerRequest.Email, registerRequest.Password);
+            ErrorOr<AuthenticationResult> registerResult = authenticationCommandService.Register(registerRequest.FirstName, registerRequest.LastName, registerRequest.Email, registerRequest.Password);
             return registerResult.Match(registerResult => Ok(MapAuthResult(registerResult)),
                 errors => Problem(errors));
         }
@@ -30,10 +31,10 @@ namespace BuberDinner.RestAPI.Controllers
         [HttpPost("login")]
         public IActionResult Login(LoginRequest loginRequest)
         {
-            var result = authenticationService.Login(loginRequest.Email, loginRequest.Password);
+            var result = authenticationQueryService.Login(loginRequest.Email, loginRequest.Password);
             if (result.IsError && result.FirstError == Errors.Authentication.InvalidCredentials)
             {
-                return Problem(statusCode:StatusCodes.Status401Unauthorized,title:result.FirstError.Description);
+                return Problem(statusCode: StatusCodes.Status401Unauthorized, title: result.FirstError.Description);
             }
             {
 

@@ -1,6 +1,5 @@
 ﻿using BuberDinner.RestAPI.Common.Http;
 using ErrorOr;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BuberDinner.RestAPI.Controllers
@@ -20,7 +19,7 @@ namespace BuberDinner.RestAPI.Controllers
                 ErrorType.NotFound => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError,
             };
-            return Problem(statusCode:statusCode,title:firstError.Description);
+            return Problem(statusCode: statusCode, title: firstError.Description);
         }
     }
 }

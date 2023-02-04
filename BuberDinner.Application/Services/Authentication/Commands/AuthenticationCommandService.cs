@@ -1,10 +1,9 @@
-﻿using BuberDinner.Application.Common.Errors;
-using BuberDinner.Application.Common.Interfaces.Authentication;
+﻿using BuberDinner.Application.Common.Interfaces.Authentication;
 using BuberDinner.Application.Common.Interfaces.Persistence;
+using BuberDinner.Application.Services.Authentication.Common;
 using BuberDinner.Domain.Common.Errors;
 using BuberDinner.Domain.Entities;
 using ErrorOr;
-using FluentResults;
 
 namespace BuberDinner.Application.Services.Authentication.Commands
 {
@@ -33,23 +32,6 @@ namespace BuberDinner.Application.Services.Authentication.Commands
                 Password = password
             };
             userRepository.Add(user);
-            var token = jwtTokenGenerator.GenerateToken(user);
-            return new AuthenticationResult(user, token);
-        }
-
-        public ErrorOr<AuthenticationResult> Login(string email, string password)
-        {
-            //Validation the user
-            if (userRepository.GetUserByEmail(email) is not User user)
-            {
-                return Errors.Authentication.InvalidCredentials;
-            }
-            //Validating the password
-            if (user.Password != password)
-            {
-                return new[] { Errors.Authentication.InvalidCredentials };
-            }
-            //Creating token
             var token = jwtTokenGenerator.GenerateToken(user);
             return new AuthenticationResult(user, token);
         }
