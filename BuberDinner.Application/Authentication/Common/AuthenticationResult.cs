@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace BuberDinner.Application.Authentication.Common
 {
-   public record AuthenticationResult(User User,string token);
+   public record AuthenticationResult(User User,string Token);
 }
