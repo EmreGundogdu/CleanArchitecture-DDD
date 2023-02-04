@@ -1,7 +1,11 @@
 ﻿using BuberDinner.Application.Authentication.Commands.Register;
+using BuberDinner.Application.Authentication.Common;
+using BuberDinner.Application.Authentication.Queries.Login;
 using BuberDinner.Contracts.Authentication;
 using BuberDinner.Domain.Common.Errors;
 using ErrorOr;
+using MediatR;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BuberDinner.RestAPI.Controllers
@@ -9,9 +13,9 @@ namespace BuberDinner.RestAPI.Controllers
     [Route("[controller]")]
     public class AuthenticationController : ApiController
     {
-        private readonly IMediator mediator;
+        private readonly ISender mediator;
 
-        public AuthenticationController(IMediator mediator)
+        public AuthenticationController(ISender mediator)
         {
             this.mediator = mediator;
         }
@@ -26,15 +30,13 @@ namespace BuberDinner.RestAPI.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login(LoginRequest loginRequest)
+        public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
-            var result = authenticationQueryService.Login(loginRequest.Email, loginRequest.Password);
+            var query = new LoginQuery(loginRequest.Email, loginRequest.Password);
+            var result = await mediator.Send(query);
             if (result.IsError && result.FirstError == Errors.Authentication.InvalidCredentials)
             {
                 return Problem(statusCode: StatusCodes.Status401Unauthorized, title: result.FirstError.Description);
-            }
-            {
-
             }
             return result.Match(result => Ok(MapAuthResult(result)),
                 errors => Problem(errors));
