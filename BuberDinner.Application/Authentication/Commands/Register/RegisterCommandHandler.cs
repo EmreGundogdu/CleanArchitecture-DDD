@@ -1,35 +1,35 @@
 ﻿using BuberDinner.Application.Common.Interfaces.Authentication;
 using BuberDinner.Application.Common.Interfaces.Persistence;
-using BuberDinner.Application.Services.Authentication.Common;
 using BuberDinner.Domain.Common.Errors;
 using BuberDinner.Domain.Entities;
 using ErrorOr;
+using MediatR;
 
-namespace BuberDinner.Application.Services.Authentication.Commands
+namespace BuberDinner.Application.Authentication.Commands.Register
 {
-    public class AuthenticationCommandService : IAuthenticationCommandService
+    public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<AuthenticationResult>>
     {
         private readonly IJwtTokenGenerator jwtTokenGenerator;
         private readonly IUserRepository userRepository;
 
-        public AuthenticationCommandService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
+        public RegisterCommandHandler(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
         {
             this.jwtTokenGenerator = jwtTokenGenerator;
             this.userRepository = userRepository;
         }
 
-        public ErrorOr<AuthenticationResult> Register(string firstName, string lastName, string email, string password)
+        public async Task<ErrorOr<AuthenticationResult>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
-            if (userRepository.GetUserByEmail(email) is not null)
+            if (userRepository.GetUserByEmail(request.Email) is not null)
             {
                 return Errors.User.DuplicateEmail;
             }
             var user = new User()
             {
-                Email = email,
-                FirstName = firstName,
-                LastName = lastName,
-                Password = password
+                Email = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Password = request.Password
             };
             userRepository.Add(user);
             var token = jwtTokenGenerator.GenerateToken(user);
