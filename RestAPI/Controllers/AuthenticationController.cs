@@ -12,9 +12,9 @@ namespace BuberDinner.RestAPI.Controllers
     [Route("[controller]")]
     public class AuthenticationController : ApiController
     {
-        private readonly IAuthenticationService authenticationService;
+        private readonly IAuthenticationCommandService authenticationService;
 
-        public AuthenticationController(IAuthenticationService authenticationService)
+        public AuthenticationController(IAuthenticationCommandService authenticationService)
         {
             this.authenticationService = authenticationService;
         }

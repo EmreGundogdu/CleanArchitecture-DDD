@@ -6,14 +6,14 @@ using BuberDinner.Domain.Entities;
 using ErrorOr;
 using FluentResults;
 
-namespace BuberDinner.Application.Services.Authentication
+namespace BuberDinner.Application.Services.Authentication.Commands
 {
-    public class AuthenticationService : IAuthenticationService
+    public class AuthenticationCommandService : IAuthenticationCommandService
     {
         private readonly IJwtTokenGenerator jwtTokenGenerator;
         private readonly IUserRepository userRepository;
 
-        public AuthenticationService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
+        public AuthenticationCommandService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
         {
             this.jwtTokenGenerator = jwtTokenGenerator;
             this.userRepository = userRepository;
@@ -42,16 +42,16 @@ namespace BuberDinner.Application.Services.Authentication
             //Validation the user
             if (userRepository.GetUserByEmail(email) is not User user)
             {
-                return Errors.Authentication.InvalidCredentials;  
+                return Errors.Authentication.InvalidCredentials;
             }
             //Validating the password
-            if (user.Password!=password)
+            if (user.Password != password)
             {
                 return new[] { Errors.Authentication.InvalidCredentials };
             }
             //Creating token
             var token = jwtTokenGenerator.GenerateToken(user);
-            return new AuthenticationResult(user,token);
+            return new AuthenticationResult(user, token);
         }
     }
 }
