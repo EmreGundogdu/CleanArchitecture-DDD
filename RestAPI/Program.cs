@@ -1,8 +1,6 @@
 using BuberDinner.Application;
 using BuberDinner.Infrastructure;
 using BuberDinner.RestAPI.Common.Errors;
-using BuberDinner.RestAPI.Filters;
-using BuberDinner.RestAPI.Middleware;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,6 +1,7 @@
 ﻿using BuberDinner.Application.Common.Errors;
 using BuberDinner.Application.Services.Authentication;
 using BuberDinner.Contracts.Authentication;
+using ErrorOr;
 using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,17 +22,9 @@ namespace BuberDinner.RestAPI.Controllers
         [HttpPost("register")]
         public IActionResult Register(RegisterRequest registerRequest)
         {
-            Result<AuthenticationResult> registerResult = authenticationService.Register(registerRequest.FirstName, registerRequest.LastName, registerRequest.Email, registerRequest.Password);
-            if (registerResult.IsSuccess)
-            {
-                return Ok(MapAuthResult(registerResult.Value));
-            }
-            var firstError = registerResult.Errors[0];
-            if (firstError is DuplicateEmailError)
-            {
-                return Problem(statusCode:StatusCodes.Status409Conflict,detail:"Email already exits.");
-            }
-            return Problem();
+            ErrorOr<AuthenticationResult> registerResult = authenticationService.Register(registerRequest.FirstName, registerRequest.LastName, registerRequest.Email, registerRequest.Password);
+            return registerResult.Match(registerResult => Ok(MapAuthResult(registerResult)),
+                _ => Problem(statusCode: StatusCodes.Status409Conflict, title: "User already exits"));
         }
 
         private static AuthenticationResponse MapAuthResult(AuthenticationResult authResult)
